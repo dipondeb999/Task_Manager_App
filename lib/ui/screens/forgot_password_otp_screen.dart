@@ -1,18 +1,20 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:task_manager_app/ui/screens/forgot_password_otp_screen.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:task_manager_app/ui/screens/reset_password_screen.dart';
+import 'package:task_manager_app/ui/screens/sign_in_screen.dart';
 import 'package:task_manager_app/ui/utils/app_colors.dart';
 import 'package:task_manager_app/ui/widgets/screen_background.dart';
 
-class ForgotPasswordEmailScreen extends StatefulWidget {
-  const ForgotPasswordEmailScreen({super.key});
+class ForgotPasswordOTPScreen extends StatefulWidget {
+  const ForgotPasswordOTPScreen({super.key});
 
   @override
-  State<ForgotPasswordEmailScreen> createState() =>
-      _ForgotPasswordEmailScreenState();
+  State<ForgotPasswordOTPScreen> createState() =>
+      _ForgotPasswordOTPScreenState();
 }
 
-class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
+class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -26,17 +28,17 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
               children: [
                 const SizedBox(height: 82),
                 Text(
-                  "Your Email Address",
+                  "Pin Verification",
                   style: textTheme.displaySmall
                       ?.copyWith(fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  "A 6 digits verification OTP will be sent to your email address",
+                  "A 6 digits verification OTP has been sent to your email address",
                   style: textTheme.titleSmall?.copyWith(color: Colors.grey),
                 ),
                 const SizedBox(height: 24),
-                _buildVerifyEmailForm(),
+                _buildPinVerificationSection(),
                 const SizedBox(height: 48),
                 _buildSignUpSection(),
               ],
@@ -47,14 +49,28 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
     );
   }
 
-  Widget _buildVerifyEmailForm() {
+  Widget _buildPinVerificationSection() {
     return Column(
       children: [
-        TextFormField(
-          keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            hintText: "Email",
+        PinCodeTextField(
+          appContext: context,
+          length: 6,
+          obscureText: false,
+          animationType: AnimationType.fade,
+          keyboardType: TextInputType.number,
+          pinTheme: PinTheme(
+            shape: PinCodeFieldShape.box,
+            borderRadius: BorderRadius.circular(5),
+            fieldHeight: 50,
+            fieldWidth: 40,
+            activeFillColor: Colors.white,
+            inactiveFillColor: Colors.white,
+            selectedFillColor: Colors.white,
           ),
+          cursorColor: Colors.black,
+          animationDuration: const Duration(milliseconds: 300),
+          backgroundColor: Colors.transparent,
+          enableActiveFill: true,
         ),
         const SizedBox(height: 24),
         ElevatedButton(
@@ -93,12 +109,18 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const ForgotPasswordOTPScreen(),
+        builder: (context) => const ResetPasswordScreen(),
       ),
     );
   }
 
   void _onTapSignUpButton() {
-    Navigator.pop(context);
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SignInScreen(),
+      ),
+      (_) => false,
+    );
   }
 }
