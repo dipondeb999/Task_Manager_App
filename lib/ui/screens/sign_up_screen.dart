@@ -11,6 +11,13 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  bool _inProgress = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  TextEditingController _emailTEController = TextEditingController();
+  TextEditingController _firstNameTEController = TextEditingController();
+  TextEditingController _lastNameTEController = TextEditingController();
+  TextEditingController _mobileTEController = TextEditingController();
+  TextEditingController _passwordTEController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -41,44 +48,52 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _buildSignUpForm() {
-    return Column(
-      children: [
-        TextFormField(
-          keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            hintText: "Email",
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          TextFormField(
+            controller: _emailTEController,
+            keyboardType: TextInputType.emailAddress,
+            decoration: const InputDecoration(
+              hintText: "Email",
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          decoration: const InputDecoration(
-            hintText: "First name",
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _firstNameTEController,
+            decoration: const InputDecoration(
+              hintText: "First name",
+            ),
+          ),const SizedBox(height: 8),
+          TextFormField(
+            controller: _lastNameTEController,
+            decoration: const InputDecoration(
+              hintText: "Last name",
+            ),
           ),
-        ),const SizedBox(height: 8),
-        TextFormField(
-          decoration: const InputDecoration(
-            hintText: "Last name",
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _mobileTEController,
+            keyboardType: TextInputType.phone,
+            decoration: const InputDecoration(
+              hintText: "Mobile",
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(
-            hintText: "Mobile",
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _passwordTEController,
+            decoration: const InputDecoration(
+              hintText: "Password",
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          decoration: const InputDecoration(
-            hintText: "Password",
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: _onTapNextButton,
+            child: const Icon(Icons.arrow_circle_right_outlined),
           ),
-        ),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: _onTapNextButton,
-          child: const Icon(Icons.arrow_circle_right_outlined),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
