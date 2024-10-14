@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:task_manager_app/ui/screens/sign_in_screen.dart';
 import 'package:task_manager_app/ui/utils/app_colors.dart';
+import 'package:task_manager_app/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager_app/ui/widgets/screen_background.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
@@ -12,6 +13,10 @@ class ResetPasswordScreen extends StatefulWidget {
 }
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
+  bool _inProgress = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _passwordTEController = TextEditingController();
+  final TextEditingController _confirmPasswordTEController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -47,27 +52,56 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   Widget _buildResetPasswordForm() {
-    return Column(
-      children: [
-        TextFormField(
-          keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            hintText: "Password",
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          TextFormField(
+            controller: _passwordTEController,
+            keyboardType: TextInputType.emailAddress,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: const InputDecoration(
+              hintText: "Password",
+            ),
+            validator: (String? value) {
+              if (value?.isEmpty ?? true) {
+                return 'Enter your password';
+              }
+              if (value!.length <= 6) {
+                return 'Enter a password more than 6 characters';
+              }
+              return null;
+            },
           ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            hintText: "Confirm Password",
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _confirmPasswordTEController,
+            keyboardType: TextInputType.emailAddress,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: const InputDecoration(
+              hintText: "Confirm Password",
+            ),
+            validator: (String? value) {
+              if (value?.isEmpty ?? true) {
+                return 'Enter your confirm password';
+              }
+              if (value!.length <= 6) {
+                return 'Enter a password more than 6 characters';
+              }
+              return null;
+            },
           ),
-        ),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: _onTapNextButton,
-          child: const Icon(Icons.arrow_circle_right_outlined),
-        ),
-      ],
+          const SizedBox(height: 24),
+          Visibility(
+            visible: !_inProgress,
+            replacement: const CenteredCircularProgressIndicator(),
+            child: ElevatedButton(
+              onPressed: _onTapNextButton,
+              child: const Icon(Icons.arrow_circle_right_outlined),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -96,6 +130,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   }
 
   void _onTapNextButton() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
@@ -113,5 +150,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       ),
       (_) => false,
     );
+  }
+
+  @override
+  void dispose() {
+    _passwordTEController.dispose();
+    _confirmPasswordTEController.dispose();
+    super.dispose();
   }
 }

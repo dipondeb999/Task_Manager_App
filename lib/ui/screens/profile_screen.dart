@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:task_manager_app/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager_app/ui/widgets/task_manager_app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -9,6 +10,13 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  bool _inProgress = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailTEController = TextEditingController();
+  final TextEditingController _firstNameTEController = TextEditingController();
+  final TextEditingController _lastNameTEController = TextEditingController();
+  final TextEditingController _phoneTEController = TextEditingController();
+  final TextEditingController _passwordTEController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,40 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 32),
               _buildPhotoPicker(),
               const SizedBox(height: 24),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Email',
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'First name',
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Last name',
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Phone',
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                decoration: const InputDecoration(
-                  hintText: 'Password',
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                  onPressed: () {},
-                  child: const Icon(Icons.arrow_circle_right_outlined),
-              ),
+              _buildTextFormFields(),
               const SizedBox(height: 24),
             ],
           ),
@@ -104,5 +79,114 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildTextFormFields() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          TextFormField(
+            controller: _emailTEController,
+            keyboardType: TextInputType.emailAddress,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: const InputDecoration(
+              hintText: 'Email',
+            ),
+            validator: (String? value) {
+              if (value?.isEmpty ?? true) {
+                return 'Enter a valid email';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _firstNameTEController,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: const InputDecoration(
+              hintText: 'First name',
+            ),
+            validator: (String? value) {
+              if (value?.isEmpty ?? true) {
+                return 'Enter first name';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _lastNameTEController,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: const InputDecoration(
+              hintText: 'Last name',
+            ),
+            validator: (String? value) {
+              if (value?.isEmpty ?? true) {
+                return 'Enter last name';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _phoneTEController,
+            keyboardType: TextInputType.number,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: const InputDecoration(
+              hintText: 'Phone',
+            ),
+            validator: (String? value) {
+              if (value?.isEmpty ?? true) {
+                return 'Enter your phone number';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _passwordTEController,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            decoration: const InputDecoration(
+              hintText: 'Password',
+            ),
+            validator: (String? value) {
+              if (value?.isEmpty ?? true) {
+                return 'Enter your password';
+              }
+              if (value!.length <= 6) {
+                return 'Enter a password more than 6 characters';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 24),
+          Visibility(
+            visible: !_inProgress,
+            replacement: const CenteredCircularProgressIndicator(),
+            child: ElevatedButton(
+              onPressed: _onTapUpdateButton,
+              child: const Icon(Icons.arrow_circle_right_outlined),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onTapUpdateButton() {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailTEController.dispose();
+    _firstNameTEController.dispose();
+    _lastNameTEController.dispose();
+    _phoneTEController.dispose();
+    _passwordTEController.dispose();
+    super.dispose();
   }
 }

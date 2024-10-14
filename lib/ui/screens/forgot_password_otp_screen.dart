@@ -4,17 +4,20 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:task_manager_app/ui/screens/reset_password_screen.dart';
 import 'package:task_manager_app/ui/screens/sign_in_screen.dart';
 import 'package:task_manager_app/ui/utils/app_colors.dart';
+import 'package:task_manager_app/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager_app/ui/widgets/screen_background.dart';
 
 class ForgotPasswordOTPScreen extends StatefulWidget {
   const ForgotPasswordOTPScreen({super.key});
 
   @override
-  State<ForgotPasswordOTPScreen> createState() =>
-      _ForgotPasswordOTPScreenState();
+  State<ForgotPasswordOTPScreen> createState() => _ForgotPasswordOTPScreenState();
 }
 
 class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
+  bool _inProgress = false;
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _pinController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = Theme.of(context).textTheme;
@@ -50,34 +53,48 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
   }
 
   Widget _buildPinVerificationSection() {
-    return Column(
-      children: [
-        PinCodeTextField(
-          appContext: context,
-          length: 6,
-          obscureText: false,
-          animationType: AnimationType.fade,
-          keyboardType: TextInputType.number,
-          pinTheme: PinTheme(
-            shape: PinCodeFieldShape.box,
-            borderRadius: BorderRadius.circular(5),
-            fieldHeight: 50,
-            fieldWidth: 40,
-            activeFillColor: Colors.white,
-            inactiveFillColor: Colors.white,
-            selectedFillColor: Colors.white,
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          PinCodeTextField(
+            controller: _pinController,
+            appContext: context,
+            length: 6,
+            obscureText: false,
+            animationType: AnimationType.fade,
+            keyboardType: TextInputType.number,
+            pinTheme: PinTheme(
+              shape: PinCodeFieldShape.box,
+              borderRadius: BorderRadius.circular(5),
+              fieldHeight: 50,
+              fieldWidth: 40,
+              activeFillColor: Colors.white,
+              inactiveFillColor: Colors.white,
+              selectedFillColor: Colors.white,
+            ),
+            cursorColor: Colors.black,
+            animationDuration: const Duration(milliseconds: 300),
+            backgroundColor: Colors.transparent,
+            enableActiveFill: true,
+            validator: (String? value) {
+              if (value?.isEmpty ?? true) {
+                return 'Enter your verification code';
+              }
+              return null;
+            },
           ),
-          cursorColor: Colors.black,
-          animationDuration: const Duration(milliseconds: 300),
-          backgroundColor: Colors.transparent,
-          enableActiveFill: true,
-        ),
-        const SizedBox(height: 24),
-        ElevatedButton(
-          onPressed: _onTapNextButton,
-          child: const Icon(Icons.arrow_circle_right_outlined),
-        ),
-      ],
+          const SizedBox(height: 24),
+          Visibility(
+            visible: !_inProgress,
+            replacement: const CenteredCircularProgressIndicator(),
+            child: ElevatedButton(
+              onPressed: _onTapNextButton,
+              child: const Icon(Icons.arrow_circle_right_outlined),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -106,6 +123,9 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
   }
 
   void _onTapNextButton() {
+    if(!_formKey.currentState!.validate()) {
+      return;
+    }
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -122,5 +142,11 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
       ),
       (_) => false,
     );
+  }
+
+  @override
+  void dispose() {
+    _pinController.dispose();
+    super.dispose();
   }
 }
