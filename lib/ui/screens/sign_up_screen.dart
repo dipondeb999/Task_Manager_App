@@ -194,7 +194,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() {});
     if (response.isSuccess) {
       _clearTextFields();
-      showSnackBarMessage(context, 'New user created');
+      showSnackBarMessage(context, 'New user created!');
     }else{
       showSnackBarMessage(context, response.errorMessage, true);
     }
