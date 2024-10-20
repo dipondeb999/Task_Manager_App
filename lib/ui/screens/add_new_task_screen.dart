@@ -14,28 +14,38 @@ class AddNewTaskScreen extends StatefulWidget {
 }
 
 class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
-  bool _inProgress = false;
+  bool _addNewTakInProgress = false;
+  bool _shouldRefreshPreviousPage = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _titleTEController = TextEditingController();
   final TextEditingController _descriptionTEController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const TaskManagerAppBar(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 42),
-              Text(
-                "Add New Task",
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 24),
-              _buildTextFormFields(),
-            ],
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        if (didPop) {
+          return;
+        }
+        Navigator.pop(context, _shouldRefreshPreviousPage);
+      },
+      child: Scaffold(
+        appBar: const TaskManagerAppBar(),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 42),
+                Text(
+                  "Add New Task",
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 24),
+                _buildTextFormFields(),
+              ],
+            ),
           ),
         ),
       ),
@@ -76,7 +86,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
           ),
           const SizedBox(height: 24),
           Visibility(
-            visible: !_inProgress,
+            visible: !_addNewTakInProgress,
             replacement: const CenteredCircularProgressIndicator(),
             child: ElevatedButton(
               onPressed: _onTapSubmittedButton,
@@ -95,7 +105,10 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   }
 
   Future<void> _addNewTask() async {
-    _inProgress = true;
+
+    _shouldRefreshPreviousPage = true;
+
+    _addNewTakInProgress = true;
     setState(() {});
 
     Map<String, dynamic> requestBody = {
@@ -106,7 +119,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
 
     final NetworkResponse response = await NetworkCaller.postRequest(url: Urls.addNewTask, body: requestBody);
 
-    _inProgress = false;
+    _addNewTakInProgress = false;
     setState(() {});
 
     if (response.isSuccess) {
@@ -117,6 +130,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
     }
 
   }
+
   void _clearTextFields() {
     _titleTEController.clear();
     _descriptionTEController.clear();
