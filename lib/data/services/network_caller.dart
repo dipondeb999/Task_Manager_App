@@ -39,7 +39,7 @@ class NetworkCaller {
       }
     } catch (e) {
       return NetworkResponse(
-        isSuccess: false,
+        isSuccess: true,
         statusCode: -1,
         errorMessage: e.toString(),
       );
