@@ -61,6 +61,7 @@ class NetworkCaller {
       printResponse(url, response);
       if (response.statusCode == 200) {
         final decodeData = jsonDecode(response.body);
+
         if (decodeData['status'] == 'fail') {
           return NetworkResponse(
             isSuccess: false,
@@ -88,7 +89,7 @@ class NetworkCaller {
       }
     } catch (e) {
       return NetworkResponse(
-        isSuccess: true,
+        isSuccess: false,
         statusCode: -1,
         errorMessage: e.toString(),
       );
