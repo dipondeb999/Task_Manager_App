@@ -7,6 +7,7 @@ import 'package:task_manager_app/ui/controllers/auth_controller.dart';
 import 'package:task_manager_app/ui/screens/sign_in_screen.dart';
 
 class NetworkCaller {
+
   static Future<NetworkResponse> getRequest({required String url}) async {
     try {
       Uri uri = Uri.parse(url);
@@ -38,7 +39,7 @@ class NetworkCaller {
       }
     } catch (e) {
       return NetworkResponse(
-        isSuccess: true,
+        isSuccess: false,
         statusCode: -1,
         errorMessage: e.toString(),
       );
