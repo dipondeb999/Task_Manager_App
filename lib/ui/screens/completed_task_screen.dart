@@ -16,7 +16,7 @@ class CompletedTaskScreen extends StatefulWidget {
 }
 
 class _CompletedTaskScreenState extends State<CompletedTaskScreen> {
-  bool _getCompletedTaskListInProgress = false;
+  bool _completedTaskListInProgress = false;
 
   List<TaskModel> _completedTaskList = [];
 
@@ -29,7 +29,7 @@ class _CompletedTaskScreenState extends State<CompletedTaskScreen> {
   @override
   Widget build(BuildContext context) {
     return Visibility(
-      visible: !_getCompletedTaskListInProgress,
+      visible: !_completedTaskListInProgress,
       replacement: const CenteredCircularProgressIndicator(),
       child: RefreshIndicator(
         onRefresh: () async {
@@ -51,7 +51,7 @@ class _CompletedTaskScreenState extends State<CompletedTaskScreen> {
   }
   Future<void> _getCompletedTaskList() async {
     _completedTaskList.clear();
-    _getCompletedTaskListInProgress = true;
+    _completedTaskListInProgress = true;
     setState(() {});
     final NetworkResponse response = await NetworkCaller.getRequest(url: Urls.completedList);
     if (response.isSuccess) {
@@ -60,7 +60,7 @@ class _CompletedTaskScreenState extends State<CompletedTaskScreen> {
     }else{
       showSnackBarMessage(context, response.errorMessage, true);
     }
-    _getCompletedTaskListInProgress = false;
+    _completedTaskListInProgress = false;
     setState(() {});
   }
 }
