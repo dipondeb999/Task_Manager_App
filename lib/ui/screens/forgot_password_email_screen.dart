@@ -17,7 +17,7 @@ class ForgotPasswordEmailScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
-  bool _inProgress = false;
+  bool _forgetPasswordEmailInProgress = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailTEController = TextEditingController();
   @override
@@ -75,7 +75,7 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
           ),
           const SizedBox(height: 24),
           Visibility(
-            visible: !_inProgress,
+            visible: !_forgetPasswordEmailInProgress,
             replacement: const CenteredCircularProgressIndicator(),
             child: ElevatedButton(
               onPressed: _onTapNextButton,
@@ -119,11 +119,17 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
   }
 
   Future<void> _recoverVerifyEmail() async {
-    _inProgress = true;
+    _forgetPasswordEmailInProgress = true;
     setState(() {});
-    final NetworkResponse response = await NetworkCaller.getRequest(url: Urls.recoverVerifyEmail);
-    _inProgress = false;
+
+    final String email = _emailTEController.text.trim();
+    final String requestUrl = '${Urls.recoverVerifyEmail}?email=$email';
+
+    final NetworkResponse response = await NetworkCaller.getRequest(url: requestUrl);
+
+    _forgetPasswordEmailInProgress = false;
     setState(() {});
+
     if (response.isSuccess) {
       Navigator.push(
         context,
@@ -131,6 +137,7 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
           builder: (context) => const ForgotPasswordOTPScreen(),
         ),
       );
+      showSnackBarMessage(context, 'A 6 digit OTP code sent to your email');
     }else{
       showSnackBarMessage(context, response.errorMessage, true);
     }
