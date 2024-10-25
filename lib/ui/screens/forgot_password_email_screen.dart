@@ -123,7 +123,7 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
     setState(() {});
 
     final String email = _emailTEController.text.trim();
-    final String requestUrl = '${Urls.recoverVerifyEmail}?email=$email';
+    final String requestUrl = '${Urls.recoverVerifyEmail}?email=${Uri.encodeQueryComponent(email)}';
 
     final NetworkResponse response = await NetworkCaller.getRequest(url: requestUrl);
 
