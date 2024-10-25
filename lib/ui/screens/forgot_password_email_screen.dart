@@ -122,10 +122,7 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
     _forgetPasswordEmailInProgress = true;
     setState(() {});
 
-    final String email = _emailTEController.text.trim();
-    final String requestUrl = '${Urls.recoverVerifyEmail}?email=${Uri.encodeQueryComponent(email)}';
-
-    final NetworkResponse response = await NetworkCaller.getRequest(url: requestUrl);
+    final NetworkResponse response = await NetworkCaller.getRequest(url: '${Urls.recoverVerifyEmail}?email=${_emailTEController.text}');
 
     _forgetPasswordEmailInProgress = false;
     setState(() {});

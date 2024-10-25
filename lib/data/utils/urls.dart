@@ -8,5 +8,5 @@ class Urls {
   static const String completedList = '$_baseUrl/listTaskByStatus/Completed';
   static const String cancelledList = '$_baseUrl/listTaskByStatus/Cancelled';
   static const String progressList = '$_baseUrl/listTaskByStatus/Progress';
-  static String recoverVerifyEmail(String email) => '$_baseUrl/RecoverVerifyEmail/$email';
+  static const String recoverVerifyEmail = '$_baseUrl/RecoverVerifyEmail';
 }
