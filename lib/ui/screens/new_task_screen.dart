@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:task_manager_app/data/models/network_response.dart';
 import 'package:task_manager_app/data/models/task_list_model.dart';
 import 'package:task_manager_app/data/models/task_model.dart';
+import 'package:task_manager_app/data/models/task_status_count_model.dart';
+import 'package:task_manager_app/data/models/task_status_model.dart';
 import 'package:task_manager_app/data/services/network_caller.dart';
 import 'package:task_manager_app/data/utils/urls.dart';
 import 'package:task_manager_app/ui/screens/add_new_task_screen.dart';
@@ -20,12 +22,15 @@ class NewTaskScreen extends StatefulWidget {
 
 class _NewTaskScreenState extends State<NewTaskScreen> {
   bool _getNewTaskListInProgress = false;
+  bool _getTaskStatusCountListInProgress = false;
 
   List<TaskModel> _newTaskList = [];
+  List<TaskStatusModel> _taskStatusCountList = [];
 
   @override
   void initState() {
     _getNewTaskList();
+    _getTaskStatusCount();
     super.initState();
   }
 
@@ -35,6 +40,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       body: RefreshIndicator(
         onRefresh: () async {
           _getNewTaskList();
+          _getTaskStatusCount();
         },
         child: Column(
           children: [
@@ -48,6 +54,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
                   itemBuilder: (context, index) {
                     return TaskCard(
                       taskModel: _newTaskList[index],
+                      onRefreshList: _getNewTaskList,
                     );
                   },
                   separatorBuilder: (context, index) {
@@ -71,29 +78,33 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
   }
 
   Widget _buildSummarySection() {
-    return const Padding(
-      padding: EdgeInsets.all(8.0),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            TaskSummaryCard(
-              title: 'New',
-              count: 09,
-            ),
-            TaskSummaryCard(
-              title: 'Completed',
-              count: 09,
-            ),
-            TaskSummaryCard(
-              title: 'Cancelled',
-              count: 09,
-            ),
-            TaskSummaryCard(
-              title: 'Progress',
-              count: 09,
-            ),
-          ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Visibility(
+        visible: !_getTaskStatusCountListInProgress,
+        replacement: const CenteredCircularProgressIndicator(),
+        child: const SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              TaskSummaryCard(
+                title: 'New',
+                count: 09,
+              ),
+              TaskSummaryCard(
+                title: 'Completed',
+                count: 09,
+              ),
+              TaskSummaryCard(
+                title: 'Cancelled',
+                count: 09,
+              ),
+              TaskSummaryCard(
+                title: 'Progress',
+                count: 09,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -123,6 +134,21 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       showSnackBarMessage(context, response.errorMessage, true);
     }
     _getNewTaskListInProgress = false;
+    setState(() {});
+  }
+
+  Future<void> _getTaskStatusCount() async {
+    _taskStatusCountList.clear();
+    _getTaskStatusCountListInProgress = true;
+    setState(() {});
+    final NetworkResponse response = await NetworkCaller.getRequest(url: Urls.newTaskList);
+    if (response.isSuccess) {
+      final TaskStatusCountModel taskStatusCountModel = TaskStatusCountModel.fromJson(response.responseData);
+      _taskStatusCountList = taskStatusCountModel.taskStatusCountList ?? [];
+    }else{
+      showSnackBarMessage(context, response.errorMessage, true);
+    }
+    _getTaskStatusCountListInProgress = false;
     setState(() {});
   }
 }
