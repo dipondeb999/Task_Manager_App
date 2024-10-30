@@ -83,31 +83,22 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
       child: Visibility(
         visible: !_getTaskStatusCountListInProgress,
         replacement: const CenteredCircularProgressIndicator(),
-        child: const SingleChildScrollView(
+        child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: [
-              TaskSummaryCard(
-                title: 'New',
-                count: 09,
-              ),
-              TaskSummaryCard(
-                title: 'Completed',
-                count: 09,
-              ),
-              TaskSummaryCard(
-                title: 'Cancelled',
-                count: 09,
-              ),
-              TaskSummaryCard(
-                title: 'Progress',
-                count: 09,
-              ),
-            ],
+            children: _getTaskSummaryCardList(),
           ),
         ),
       ),
     );
+  }
+
+  List<TaskSummaryCard> _getTaskSummaryCardList() {
+    List<TaskSummaryCard> taskSummaryCardList = [];
+    for ( TaskStatusModel t in _taskStatusCountList) {
+      taskSummaryCardList.add(TaskSummaryCard(title: t.sId!, count: t.sum ?? 0));
+    }
+    return taskSummaryCardList;
   }
 
   Future<void> _onTapFloatingActionButton() async {
@@ -141,7 +132,7 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     _taskStatusCountList.clear();
     _getTaskStatusCountListInProgress = true;
     setState(() {});
-    final NetworkResponse response = await NetworkCaller.getRequest(url: Urls.newTaskList);
+    final NetworkResponse response = await NetworkCaller.getRequest(url: Urls.taskStatusCount);
     if (response.isSuccess) {
       final TaskStatusCountModel taskStatusCountModel = TaskStatusCountModel.fromJson(response.responseData);
       _taskStatusCountList = taskStatusCountModel.taskStatusCountList ?? [];
