@@ -1,5 +1,15 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:task_manager_app/data/models/network_response.dart';
+import 'package:task_manager_app/data/models/user_model.dart';
+import 'package:task_manager_app/data/services/network_caller.dart';
+import 'package:task_manager_app/data/utils/urls.dart';
+import 'package:task_manager_app/ui/controllers/auth_controller.dart';
 import 'package:task_manager_app/ui/widgets/centered_circular_progress_indicator.dart';
+import 'package:task_manager_app/ui/widgets/snack_bar_message.dart';
 import 'package:task_manager_app/ui/widgets/task_manager_app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -10,13 +20,31 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool _inProgress = false;
+  bool _updateProfileInProgress = false;
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   final TextEditingController _emailTEController = TextEditingController();
   final TextEditingController _firstNameTEController = TextEditingController();
   final TextEditingController _lastNameTEController = TextEditingController();
   final TextEditingController _phoneTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
+
+  XFile? _selectedImage;
+
+  void _setUserData() {
+    _emailTEController.text = AuthController.userData?.email ?? '';
+    _firstNameTEController.text = AuthController.userData?.firstName ?? '';
+    _lastNameTEController.text = AuthController.userData?.lastName ?? '';
+    _phoneTEController.text = AuthController.userData?.mobile ?? '';
+  }
+
+  @override
+  void initState() {
+    _setUserData();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,39 +74,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
   Widget _buildPhotoPicker() {
-    return Container(
-      height: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-        ),
-      child: Row(
-        children: [
-          Container(
-            height: 50,
-            width: 100,
-            decoration: const BoxDecoration(
-              color: Colors.grey,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(8),
-                bottomLeft: Radius.circular(8),
-              ),
-            ),
-            alignment: Alignment.center,
-            child: const Text(
-                "Photo",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+    return GestureDetector(
+      onTap: _pickImage,
+      child: Container(
+        height: 50,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
           ),
-          const SizedBox(width: 8),
-          const Text("Selected Photo"),
-        ],
+        child: Row(
+          children: [
+            Container(
+              height: 50,
+              width: 100,
+              decoration: const BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  bottomLeft: Radius.circular(8),
+                ),
+              ),
+              alignment: Alignment.center,
+              child: const Text(
+                  "Photo",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(_getSelectedPhotoTitle()),
+          ],
+        ),
       ),
     );
+  }
+
+  String _getSelectedPhotoTitle() {
+    if (_selectedImage != null) {
+      return _selectedImage!.name;
+    }
+    return 'Selected Photo';
+  }
+
+  Future<void> _pickImage() async {
+    ImagePicker imagePicker = ImagePicker();
+    XFile? pickedImage = await imagePicker.pickImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      _selectedImage = pickedImage;
+      setState(() {});
+    }
   }
 
   Widget _buildTextFormFields() {
@@ -90,11 +137,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             controller: _emailTEController,
             keyboardType: TextInputType.emailAddress,
             autovalidateMode: AutovalidateMode.onUserInteraction,
+            enabled: false,
             decoration: const InputDecoration(
               hintText: 'Email',
             ),
             validator: (String? value) {
-              if (value?.isEmpty ?? true) {
+              if (value?.trim().isEmpty ?? true) {
                 return 'Enter a valid email';
               }
               return null;
@@ -108,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               hintText: 'First name',
             ),
             validator: (String? value) {
-              if (value?.isEmpty ?? true) {
+              if (value?.trim().isEmpty ?? true) {
                 return 'Enter first name';
               }
               return null;
@@ -122,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               hintText: 'Last name',
             ),
             validator: (String? value) {
-              if (value?.isEmpty ?? true) {
+              if (value?.trim().isEmpty ?? true) {
                 return 'Enter last name';
               }
               return null;
@@ -137,7 +185,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               hintText: 'Phone',
             ),
             validator: (String? value) {
-              if (value?.isEmpty ?? true) {
+              if (value?.trim().isEmpty ?? true) {
                 return 'Enter your phone number';
               }
               return null;
@@ -150,19 +198,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             decoration: const InputDecoration(
               hintText: 'Password',
             ),
-            validator: (String? value) {
-              if (value?.isEmpty ?? true) {
-                return 'Enter your password';
-              }
-              if (value!.length <= 6) {
-                return 'Enter a password more than 6 characters';
-              }
-              return null;
-            },
           ),
           const SizedBox(height: 24),
           Visibility(
-            visible: !_inProgress,
+            visible: !_updateProfileInProgress,
             replacement: const CenteredCircularProgressIndicator(),
             child: ElevatedButton(
               onPressed: _onTapUpdateButton,
@@ -175,8 +214,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _onTapUpdateButton() {
-    if (!_formKey.currentState!.validate()) {
-      return;
+    if (_formKey.currentState!.validate()) {
+      _updatedProfile();
+    }
+  }
+
+  Future<void> _updatedProfile() async {
+    _updateProfileInProgress = true;
+    setState(() {});
+    Map<String, dynamic> requestBody = {
+      "email": _emailTEController.text.trim(),
+      "firstName": _firstNameTEController.text.trim(),
+      "lastName": _lastNameTEController.text.trim(),
+      "mobile": _phoneTEController.text.trim(),
+    };
+
+    if (_passwordTEController.text.isNotEmpty) {
+      requestBody['password'] = _passwordTEController.text;
+    }
+
+    if (_selectedImage != null) {
+      List<int> imageBytes = await _selectedImage!.readAsBytes();
+      String convertedImage = base64Encode(imageBytes);
+      requestBody['photo'] = convertedImage;
+    }
+
+    final NetworkResponse response = await NetworkCaller.postRequest(
+        url: Urls.updateProfile,
+      body: requestBody,
+    );
+
+    _updateProfileInProgress = false;
+    setState(() {});
+
+    if (response.isSuccess) {
+      UserModel userModel = UserModel.fromJson(requestBody);
+      AuthController.saveUserData(userModel);
+      showSnackBarMessage(context, 'Profile has been updated!');
+    } else {
+      showSnackBarMessage(context, response.errorMessage);
     }
   }
 

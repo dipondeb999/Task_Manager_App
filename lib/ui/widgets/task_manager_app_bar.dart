@@ -26,27 +26,27 @@ class TaskManagerAppBar extends StatelessWidget implements PreferredSizeWidget {
         backgroundColor: AppColors.themeColor,
         title: Row(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 20,
               backgroundColor: Colors.white,
-              backgroundImage: AssetImage("assets/images/profile.png"),
+              backgroundImage: AssetImage(AuthController.userData?.photo ?? ''),
             ),
             const SizedBox(width: 16),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Rabbil Hassan",
-                    style: TextStyle(
+                    AuthController.userData?.fullName ?? '',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   Text(
-                    "rabbilhasan@gmail.com",
-                    style: TextStyle(
+                    AuthController.userData?.email ?? '',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
                     ),
