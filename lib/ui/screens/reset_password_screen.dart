@@ -1,9 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:task_manager_app/data/models/network_response.dart';
+import 'package:task_manager_app/data/services/network_caller.dart';
+import 'package:task_manager_app/data/utils/urls.dart';
 import 'package:task_manager_app/ui/screens/sign_in_screen.dart';
 import 'package:task_manager_app/ui/utils/app_colors.dart';
 import 'package:task_manager_app/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager_app/ui/widgets/screen_background.dart';
+import 'package:task_manager_app/ui/widgets/snack_bar_message.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({super.key});
@@ -13,7 +17,7 @@ class ResetPasswordScreen extends StatefulWidget {
 }
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
-  bool _inProgress = false;
+  bool _resetPasswordInProgress = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _passwordTEController = TextEditingController();
   final TextEditingController _confirmPasswordTEController = TextEditingController();
@@ -93,7 +97,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           ),
           const SizedBox(height: 24),
           Visibility(
-            visible: !_inProgress,
+            visible: !_resetPasswordInProgress,
             replacement: const CenteredCircularProgressIndicator(),
             child: ElevatedButton(
               onPressed: _onTapNextButton,
@@ -133,13 +137,37 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const SignInScreen(),
-      ),
-      (_) => false,
+    _recoverResetPassword();
+  }
+
+  Future<void> _recoverResetPassword() async {
+    _resetPasswordInProgress = true;
+    setState(() {});
+
+    Map<String, dynamic> requestBody = {
+      "password": _passwordTEController.text,
+    };
+
+    final NetworkResponse response = await NetworkCaller.postRequest(
+        url: Urls.recoverResetPassword,
+      body: requestBody,
     );
+
+    _resetPasswordInProgress = false;
+    setState(() {});
+
+    if (response.isSuccess) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SignInScreen(),
+        ),
+            (_) => false,
+      );
+      showSnackBarMessage(context, 'Password set successfully!');
+    } else {
+      showSnackBarMessage(context, response.errorMessage, true);
+    }
   }
 
   void _onTapSignUpButton() {

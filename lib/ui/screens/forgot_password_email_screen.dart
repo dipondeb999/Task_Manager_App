@@ -115,29 +115,29 @@ class _ForgotPasswordEmailScreenState extends State<ForgotPasswordEmailScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    _recoverVerifyEmail();
+    _recoverVerifyEmail(_emailTEController.text);
   }
 
-  Future<void> _recoverVerifyEmail() async {
-    // _forgetPasswordEmailInProgress = true;
-    // setState(() {});
-    //
-    // final NetworkResponse response = await NetworkCaller.getRequest(url: '${Urls.recoverVerifyEmail}?email=${_emailTEController.text}');
-    //
-    // _forgetPasswordEmailInProgress = false;
-    // setState(() {});
-    //
-    // if (response.isSuccess) {
-    //   Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //       builder: (context) => const ForgotPasswordOTPScreen(),
-    //     ),
-    //   );
-    //   showSnackBarMessage(context, 'A 6 digit OTP code sent to your email');
-    // }else{
-    //   showSnackBarMessage(context, response.errorMessage, true);
-    // }
+  Future<void> _recoverVerifyEmail(String email) async {
+    _forgetPasswordEmailInProgress = true;
+    setState(() {});
+
+    final NetworkResponse response = await NetworkCaller.getRequest(url: Urls.verifyEmail(email));
+
+    _forgetPasswordEmailInProgress = false;
+    setState(() {});
+
+    if (response.isSuccess) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ForgotPasswordOTPScreen(email: email),
+        ),
+      );
+      showSnackBarMessage(context, 'A 6 digit OTP code sent to your email');
+    }else{
+      showSnackBarMessage(context, response.errorMessage, true);
+    }
   }
 
   void _onTapSignUpButton() {

@@ -1,21 +1,26 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:task_manager_app/data/models/network_response.dart';
+import 'package:task_manager_app/data/services/network_caller.dart';
+import 'package:task_manager_app/data/utils/urls.dart';
 import 'package:task_manager_app/ui/screens/reset_password_screen.dart';
 import 'package:task_manager_app/ui/screens/sign_in_screen.dart';
 import 'package:task_manager_app/ui/utils/app_colors.dart';
 import 'package:task_manager_app/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager_app/ui/widgets/screen_background.dart';
+import 'package:task_manager_app/ui/widgets/snack_bar_message.dart';
 
 class ForgotPasswordOTPScreen extends StatefulWidget {
-  const ForgotPasswordOTPScreen({super.key});
+  final String email;
+  const ForgotPasswordOTPScreen({super.key, required this.email});
 
   @override
   State<ForgotPasswordOTPScreen> createState() => _ForgotPasswordOTPScreenState();
 }
 
 class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
-  bool _inProgress = false;
+  bool _forgotPasswordOtpInProgress = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _pinController = TextEditingController();
   @override
@@ -78,15 +83,15 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
             backgroundColor: Colors.transparent,
             enableActiveFill: true,
             validator: (String? value) {
-              if (value?.isEmpty ?? true) {
-                return 'Enter your verification code';
+              if (value == null || value.isEmpty || value.length != 6) {
+                return 'Enter a 6-digit verification code';
               }
               return null;
             },
           ),
           const SizedBox(height: 24),
           Visibility(
-            visible: !_inProgress,
+            visible: !_forgotPasswordOtpInProgress,
             replacement: const CenteredCircularProgressIndicator(),
             child: ElevatedButton(
               onPressed: _onTapNextButton,
@@ -126,12 +131,28 @@ class _ForgotPasswordOTPScreenState extends State<ForgotPasswordOTPScreen> {
     if(!_formKey.currentState!.validate()) {
       return;
     }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ResetPasswordScreen(),
-      ),
-    );
+    _recoverVerifyOtp(widget.email, _pinController.text);
+  }
+
+  Future<void> _recoverVerifyOtp(String email, String otp) async {
+    _forgotPasswordOtpInProgress = true;
+    setState(() {});
+
+    final NetworkResponse response = await NetworkCaller.getRequest(url: Urls.verifyOtp(email, otp));
+
+    _forgotPasswordOtpInProgress = false;
+    setState(() {});
+
+    if (response.isSuccess) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const ResetPasswordScreen(),
+        ),
+      );
+    } else {
+      showSnackBarMessage(context, response.errorMessage, true);
+    }
   }
 
   void _onTapSignUpButton() {

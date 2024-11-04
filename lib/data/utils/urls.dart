@@ -10,6 +10,9 @@ class Urls {
   static const String progressList = '$_baseUrl/listTaskByStatus/Progress';
   static const String taskStatusCount = '$_baseUrl/taskStatusCount';
   static const String updateProfile = '$_baseUrl/ProfileUpdate';
+  static const String recoverResetPassword = '$_baseUrl/RecoverResetPass';
   static String changeStatus(String taskId, String status) => '$_baseUrl/updateTaskStatus/$taskId/$status';
   static String deleteTask(String taskId) => '$_baseUrl/deleteTask/$taskId';
+  static String verifyEmail(String email) => '$_baseUrl/RecoverVerifyEmail/$email';
+  static String verifyOtp(String email, String otp) => '$_baseUrl/RecoverVerifyOTP/$email/$otp';
 }
