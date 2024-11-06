@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:task_manager_app/data/models/network_response.dart';
 import 'package:task_manager_app/data/services/network_caller.dart';
 import 'package:task_manager_app/data/utils/urls.dart';
+import 'package:task_manager_app/ui/controllers/auth_controller.dart';
 import 'package:task_manager_app/ui/screens/sign_in_screen.dart';
 import 'package:task_manager_app/ui/utils/app_colors.dart';
 import 'package:task_manager_app/ui/widgets/centered_circular_progress_indicator.dart';
@@ -89,8 +90,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
               if (value?.isEmpty ?? true) {
                 return 'Enter your confirm password';
               }
-              if (value!.length <= 6) {
-                return 'Enter a password more than 6 characters';
+              if (value != _passwordTEController.text) {
+                return 'Passwords do not match';
               }
               return null;
             },

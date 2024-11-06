@@ -156,13 +156,18 @@ class _SignInScreenState extends State<SignInScreen> {
     setState(() {});
 
     Map<String, dynamic> requestBody = {
-      'email' : _emailTEController.text.trim(),
-      'password' : _passwordTEController.text,
+      'email': _emailTEController.text.trim(),
+      'password': _passwordTEController.text,
     };
 
-    final NetworkResponse response = await NetworkCaller.postRequest(url: Urls.login, body: requestBody);
+    final NetworkResponse response = await NetworkCaller.postRequest(
+        url: Urls.login,
+        body: requestBody,
+    );
+
     _inProgress = false;
     setState(() {});
+
     if (response.isSuccess) {
       LoginModel loginModel = LoginModel.fromJson(response.responseData);
       await AuthController.saveAccessToken(loginModel.token!);
@@ -172,9 +177,9 @@ class _SignInScreenState extends State<SignInScreen> {
         MaterialPageRoute(
           builder: (context) => const MainBottomNavBarScreen(),
         ),
-            (value) => false,
+        (value) => false,
       );
-    }else{
+    } else {
       showSnackBarMessage(context, response.errorMessage, true);
     }
   }

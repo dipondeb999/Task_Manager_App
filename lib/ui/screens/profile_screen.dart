@@ -248,9 +248,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (response.isSuccess) {
       UserModel userModel = UserModel.fromJson(requestBody);
       AuthController.saveUserData(userModel);
-      showSnackBarMessage(context, 'Profile has been updated!');
+      if (mounted) {
+        showSnackBarMessage(context, 'Profile has been updated!');
+      }
     } else {
-      showSnackBarMessage(context, response.errorMessage);
+      if (mounted) {
+        showSnackBarMessage(context, response.errorMessage);
+      }
     }
   }
 
