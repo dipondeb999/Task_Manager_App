@@ -80,7 +80,7 @@ class NetworkCaller {
         return NetworkResponse(
           isSuccess: false,
           statusCode: response.statusCode,
-          errorMessage: 'Unauthenticated user!'
+          errorMessage: 'Unauthenticated!'
         );
       } else {
         return NetworkResponse(

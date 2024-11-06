@@ -218,8 +218,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _updatedProfile() async {
+
     _updateProfileInProgress = true;
     setState(() {});
+
     Map<String, dynamic> requestBody = {
       "email": _emailTEController.text.trim(),
       "firstName": _firstNameTEController.text.trim(),
