@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:task_manager_app/data/models/network_response.dart';
 import 'package:task_manager_app/data/services/network_caller.dart';
 import 'package:task_manager_app/data/utils/urls.dart';
-import 'package:task_manager_app/ui/controllers/auth_controller.dart';
 import 'package:task_manager_app/ui/screens/sign_in_screen.dart';
 import 'package:task_manager_app/ui/utils/app_colors.dart';
 import 'package:task_manager_app/ui/widgets/centered_circular_progress_indicator.dart';
@@ -11,7 +10,10 @@ import 'package:task_manager_app/ui/widgets/screen_background.dart';
 import 'package:task_manager_app/ui/widgets/snack_bar_message.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
-  const ResetPasswordScreen({super.key});
+  final String email;
+  final String otp;
+
+  const ResetPasswordScreen({super.key, required this.email, required this.otp});
 
   @override
   State<ResetPasswordScreen> createState() => _ResetPasswordScreenState();
@@ -147,8 +149,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     setState(() {});
 
     Map<String, dynamic> requestBody = {
-      "email": AuthController.verifiedEmailData,
-      "OTP": AuthController.otpData,
+      "email": widget.email,
+      "OTP": widget.otp,
       "password": _passwordTEController.text,
     };
 
